@@ -22,16 +22,22 @@ operation: expr0 ;//expression;
 //            | /*epsilon*/;
 
 expr0:  expr1            #single0
-      | expr1 '+' expr0        #add
-      | expr1 '-' expr0        #del
+      | expr0 '+' expr0       #add
 ;
 
 expr1:  expr2            #single1
-      | expr2 '*' expr0    #mult
-      | expr2 '/' expr0    #dif
+      | expr1 '-' expr1  #del
 ;
 
-expr2:   INT            #int
+expr2:  expr3            #single2
+      | expr2 '*' expr2    #mult
+;
+
+expr3:  expr4            #single3
+      | expr3 '/' expr3       #div
+;
+
+expr4:   INT            #int
        | REAL            #real
        | ID              #id
        | '(' expr0 ')'        #par

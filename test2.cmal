@@ -1,3 +1,6 @@
 int x
 read(x)
 print(x)
+real y
+read(y)
+print(y)

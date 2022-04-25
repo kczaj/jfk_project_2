@@ -29,14 +29,42 @@ public class LLVMActions extends CzajmalBaseListener {
     List<Value> argumentsList = new ArrayList<Value>();
     Stack<Value> stack = new Stack<Value>();
 
-    @Override
-    public void exitAssignment(CzajmalParser.AssignmentContext ctx) {
-        String ID;
-        try {
-            ID = ctx.ID().getText();
-        } catch (NullPointerException e) {
-            ID = ctx.declaration().getChild(1).getText();
+    @Override public void exitDeclarationAssignment(CzajmalParser.DeclarationAssignmentContext ctx) {
+        String ID = ctx.declaration().getChild(1).getText();
+        String ArrayOperation = ctx.operation().getChild(0).getText();
+        if(!ArrayOperation[0].equals("[")){
+            if(!variables.containsKey(ID)){
+                error(ctx.getStart().getLine(), "variable not declared");
+            }
+            Value v = stack.pop();
+            if(!v.type.equals(variables.get(ID))){
+                error(ctx.getStart().getLine(), "assignment type mismatch");
+            }
+            if( v.type.equals("int") ){
+                LLVMGenerator.assignInt(ID, v.value);
+            }
+            if( v.type.equals("real") ){
+                LLVMGenerator.assignReal(ID, v.value);
+            }
+        } else {
+            try {
+                //Get array type and length
+                String arrType = variables.get(ID);
+                String[] split_array_type = arrType.split("\\[");
+                String type = split_array_type[0];
+                String len = split_array_type[1].split("\\]")[0];
+            } catch (Exception e){
+                error(ctx.getStart().getLine(), "variable is not an array");
+            }
+            for (Value v: argumentsList) {
+
+            }
         }
+
+    }
+
+    @Override public void exitIdAssignment(CzajmalParser.IdAssignmentContext ctx) {
+        String ID = ctx.ID().getText();
         if(!variables.containsKey(ID)){
             error(ctx.getStart().getLine(), "variable not declared");
         }
@@ -49,6 +77,34 @@ public class LLVMActions extends CzajmalBaseListener {
         }
         if( v.type.equals("real") ){
             LLVMGenerator.assignReal(ID, v.value);
+        }
+    }
+
+    @Override public void exitArrayIdAssignment(CzajmalParser.ArrayIdAssignmentContext ctx) {
+        //Get array id and element id
+        String ARRAY_ID = ctx.ARRAY_ID().getText();
+        System.err.println(ARRAY_ID);
+        String[] split_array_id = ARRAY_ID.split("\\[");
+        String id = split_array_id[0];
+        String arrId = split_array_id[1].split("\\]")[0];
+        if(!variables.containsKey(id)){
+            error(ctx.getStart().getLine(), "variable not declared");
+        }
+        //Get array type and length
+        String arrType = variables.get(id);
+        String[] split_array_type = arrType.split("\\[");
+        String type = split_array_type[0];
+        String len = split_array_type[1].split("\\]")[0];
+
+        Value v = stack.pop();
+        if(!v.type.equals(type)){
+            error(ctx.getStart().getLine(), "arrayId assignment type mismatch");
+        }
+        if( v.type.equals("int") ){
+            LLVMGenerator.assignArrayIntElement(v.value, id, arrId, len);
+        }
+        if( v.type.equals("real") ){
+            LLVMGenerator.assignArrayRealElement(v.value, id, arrId, len);
         }
     }
 
@@ -194,14 +250,14 @@ public class LLVMActions extends CzajmalBaseListener {
 
     @Override public void exitArray_id(CzajmalParser.Array_idContext ctx) {
         String ARRAY_ID = ctx.ARRAY_ID().getText();
-        String[] split_array_id = ARRAY_ID.split("[");
+        String[] split_array_id = ARRAY_ID.split("\\[");
         String id = split_array_id[0];
-        String arrId = split_array_id[1].split("]")[0];
+        String arrId = split_array_id[1].split("\\]")[0];
         if( variables.containsKey(id) ){
             String arrType = variables.get(id);
-            String[] split_array_type = arrType.split("[");
+            String[] split_array_type = arrType.split("\\[");
             String type = split_array_type[0];
-            String len = split_array_type[1].split("]")[0];
+            String len = split_array_type[1].split("\\]")[0];
             int reg = -1;
             if(type.equals("int")){
                 reg = LLVMGenerator.loadIntArrayValue(id, arrId, len);

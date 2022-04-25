@@ -53,6 +53,18 @@ class LLVMGenerator{
       main_text += "store double "+value+", double* %"+id+"\n";
    }
 
+   static void assignArrayIntElement(String value, String arrayId, String elemId, String len) {
+      main_text += "%"+reg+" = getelementptr ["+len+" x i32], ["+len+" x i32]* %"+arrayId+", i32 0, i32 "+elemId+"\n";
+      main_text += "store i32 "+value+", i32* %"+reg+"\n";
+      reg++;
+   }
+
+   static void assignArrayRealElement(String value, String arrayId, String elemId, String len) {
+      main_text += "%"+reg+" = getelementptr ["+len+" x double], ["+len+" x double]* %"+arrayId+", double 0, double "+elemId+"\n";
+      main_text += "store double "+value+", double* %"+reg+"\n";
+      reg++;
+   }
+
    static void addInt(String val1, String val2){
       main_text += "%"+reg+" = add i32 "+val1+", "+val2+"\n";
       reg++;
@@ -106,13 +118,17 @@ class LLVMGenerator{
    }
 
    static int loadIntArrayValue(String id, String arrId, String len){
-      main_text += "%"+reg+" = load i32, i32* getelementptr inbounds (["+len+" x i32], ["+len+" x i32]* %"+id+", i32 0, i32"+arrId+"), align 4";
+      main_text += "%"+reg+" = getelementptr ["+len+" x i32], ["+len+" x i32]* %"+id+", i32 0, i32 "+arrId+"\n";
+      reg++;
+      main_text += "%"+reg+" = load i32, i32* %"+(reg-1)+"\n";
       reg++;
       return reg-1;
    }
 
    static int loadRealArrayValue(String id, String arrId, String len){
-      main_text += "%"+reg+" = load double, double* getelementptr inbounds (["+len+" x double], ["+len+" x double]* %"+id+", double 0, double"+arrId+"), align 8";
+      main_text += "%"+reg+" = getelementptr ["+len+" x double], ["+len+" x double]* %"+id+", double 0, double "+arrId+"\n";
+      reg++;
+      main_text += "%"+reg+" = load double, double* %"+(reg-1)+"\n";
       reg++;
       return reg-1;
    }

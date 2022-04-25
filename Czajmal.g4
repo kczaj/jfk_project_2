@@ -11,7 +11,7 @@ statement: declaration
 
 type: INT_TYPE | REAL_TYPE;
 
-array_declare: '[' INT ']';
+array_declare: '{' INT '}';
 
 array_values: value ',' array_values
         | value;
@@ -21,12 +21,13 @@ array: '[' array_values ']';
 declaration: type ID
             | type array_declare ID;
 
-assignment: declaration '=' operation
-            | ID '=' operation
-            | ARRAY_ID '=' operation;
+assignment: declaration '=' operation #declarationAssignment
+            | ID '=' operation  #idAssignment
+            | ARRAY_ID '=' expr0    #arrayIdAssignment
+            ;
 
-operation: expr0      #expressionAssignment
-          | array         #arrayAssignment
+operation: expr0
+          | array
 ;
 
 expr0:  expr1            #single0

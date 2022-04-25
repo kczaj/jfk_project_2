@@ -7,19 +7,27 @@ statement: declaration
         | assignment
         ;
 
-declaration: type ID ;
-
-call_function: function_name '(' arguments ')';
+// VARIABLES AND OPERATIONS
 
 type: 'int' | 'real';
 
+array_declare: '[' INT ']';
+
+array_values: value ',' array_values
+        | value;
+
+array: '[' array_values ']';
+
+declaration: type ID
+            | type array_declare ID;
+
 assignment: declaration '=' operation
-            | ID '=' operation;
+            | ID '=' operation
+            | ARRAY_ID '=' operation;
 
-operation: expr0 ;//expression;
-
-//expression: expr0
-//            | /*epsilon*/;
+operation: expr0      #expressionAssignment
+          | array         #arrayAssignment
+;
 
 expr0:  expr1            #single0
       | expr0 '+' expr0       #add
@@ -40,8 +48,13 @@ expr3:  expr4            #single3
 expr4:   INT            #int
        | REAL            #real
        | ID              #id
+       | ARRAY_ID        #array_id
        | '(' expr0 ')'        #par
 ;
+
+//FUNCTIONS
+
+call_function: function_name '(' arguments ')';
 
 function_name: defined_functions
 /* tu będzie do rozszerzenia kiedy bedziemy robić funkcje definiowane przez uzytkownikow*/ ;
@@ -52,13 +65,17 @@ arguments: value ',' arguments
         | value
         | /* epsilon */;
 
-value: ID | INT | REAL;
+value: ID | INT | REAL | ARRAY_ID;
+
+//TERMINALS
 
 READ : 'read';
 
 PRINT : 'print';
 
 ID : ('a'..'z'|'A'..'Z')+;
+
+ARRAY_ID: ('a'..'z'|'A'..'Z')+'[''0'..'9'+']';
 
 INT : '0'..'9'+;
 

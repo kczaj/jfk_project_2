@@ -37,6 +37,14 @@ class LLVMGenerator{
       main_text += "%"+id+" = alloca double\n";
    }
 
+   static void declareIntArray(String id, String len){
+      main_text += "%"+id+" = alloca ["+len+" x i32]\n";
+   }
+
+   static void declareRealArray(String id, String len){
+      main_text += "%"+id+" = alloca ["+len+" x double]\n";
+   }
+
    static void assignInt(String id, String value){
       main_text += "store i32 "+value+", i32* %"+id+"\n";
    }
@@ -93,6 +101,18 @@ class LLVMGenerator{
 
    static int loadReal(String id){
       main_text += "%"+reg+" = load double, double* %"+id+"\n";
+      reg++;
+      return reg-1;
+   }
+
+   static int loadIntArrayValue(String id, String arrId, String len){
+      main_text += "%"+reg+" = load i32, i32* getelementptr inbounds (["+len+" x i32], ["+len+" x i32]* %"+id+", i32 0, i32"+arrId+"), align 4"
+      reg++;
+      return reg-1;
+   }
+
+   static int loadRealArrayValue(String id, String arrId, String len){
+      main_text += "%"+reg+" = load double, double* getelementptr inbounds (["+len+" x double], ["+len+" x double]* %"+id+", double 0, double"+arrId+"), align 8"
       reg++;
       return reg-1;
    }

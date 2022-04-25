@@ -56,14 +56,26 @@ public class LLVMActions extends CzajmalBaseListener {
     public void exitDeclaration(CzajmalParser.DeclarationContext ctx) {
         String ID = ctx.ID().getText();
         String TYPE = ctx.type().getText();
+
         if (!variables.containsKey(ID)) {
             if (types.contains(TYPE)) {
-                variables.put(ID, TYPE);
-                if (TYPE.equals("int")) {
-                    LLVMGenerator.declareInt(ID);
-                } else if (TYPE.equals("real")) {
-                    LLVMGenerator.declareReal(ID);
+                if( ctx.array_declare().isEmpty()){
+                    variables.put(ID, TYPE);
+                    if (TYPE.equals("int")) {
+                        LLVMGenerator.declareInt(ID);
+                    } else if (TYPE.equals("real")) {
+                        LLVMGenerator.declareReal(ID);
+                    }
+                } else {
+                    String ARRAY_LEN = ctx.array_declare().getChild(1).getText();
+                    variables.put(ID, TYPE+'['+ARRAY_LEN+']');
+                    if (TYPE.equals("int")) {
+                        LLVMGenerator.declareIntArray(ID, ARRAY_LEN);
+                    } else if (TYPE.equals("real")) {
+                        LLVMGenerator.declareRealArray(ID, ARRAY_LEN);
+                    }
                 }
+
             } else {
                 ctx.getStart().getLine();
                 System.err.println("Line " + ctx.getStart().getLine() + ", unknown variable type: " + TYPE);
@@ -147,6 +159,12 @@ public class LLVMActions extends CzajmalBaseListener {
         } catch (NullPointerException e) {
 
         }
+
+        try {
+            argumentsList.add(new Value("ARRAY_ID", ctx.ARRAY_ID().getText()));
+        } catch (NullPointerException e){
+
+        }
     }
 
     @Override
@@ -172,6 +190,27 @@ public class LLVMActions extends CzajmalBaseListener {
             stack.push( new Value(type, "%"+reg));
         } else {
             error(ctx.getStart().getLine(), "no such variable");
+        }
+    }
+
+    @Override public void exitArray_id(CzajmalParser.Array_idContext ctx) {
+        String ARRAY_ID = ctx.ARRAY_ID().getText();
+        String[] split_array_id = ARRAY_ID.split('[');
+        String id = split_array_id[0];
+        String arrId = split_array_id[1].split(']')[0];
+        if( variables.containsKey(id) ){
+            String arrType = variables.get(ID);
+            String[] split_array_type = arrType.split('[');
+            String type = split_array_type[0];
+            String len = split_array_type[1].split(']')[0];
+            if(type.equals("int")){
+                reg = LLVMGenerator.loadIntArrayValue(id, arrId, len);
+            } else if (type.equals("real")){
+                reg = LLVMGenerator.loadRealArrayValue(id, arrId, len);
+            }
+            stack.push( new Value(type, "%"+reg));
+        } else {
+            error(ctx.getStart().getLine(), "no such array");
         }
     }
 

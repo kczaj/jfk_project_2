@@ -106,13 +106,13 @@ class LLVMGenerator{
    }
 
    static int loadIntArrayValue(String id, String arrId, String len){
-      main_text += "%"+reg+" = load i32, i32* getelementptr inbounds (["+len+" x i32], ["+len+" x i32]* %"+id+", i32 0, i32"+arrId+"), align 4"
+      main_text += "%"+reg+" = load i32, i32* getelementptr inbounds (["+len+" x i32], ["+len+" x i32]* %"+id+", i32 0, i32"+arrId+"), align 4";
       reg++;
       return reg-1;
    }
 
    static int loadRealArrayValue(String id, String arrId, String len){
-      main_text += "%"+reg+" = load double, double* getelementptr inbounds (["+len+" x double], ["+len+" x double]* %"+id+", double 0, double"+arrId+"), align 8"
+      main_text += "%"+reg+" = load double, double* getelementptr inbounds (["+len+" x double], ["+len+" x double]* %"+id+", double 0, double"+arrId+"), align 8";
       reg++;
       return reg-1;
    }

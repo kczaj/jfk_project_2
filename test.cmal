@@ -4,7 +4,8 @@ read(x)
 int q = x + 5 * 4 - 2 / 10
 y = y + 1.1
 real w = y + 5.3 - 4.2 * 2.1 / 10.4
-real z = w
+real z = 1.0 * 2.0 * 3.0
 print(q)
 print(w)
 print(z)
+real[5] arr

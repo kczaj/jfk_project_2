@@ -9,7 +9,7 @@ statement: declaration
 
 // VARIABLES AND OPERATIONS
 
-type: 'int' | 'real';
+type: INT_TYPE | REAL_TYPE;
 
 array_declare: '[' INT ']';
 
@@ -73,6 +73,10 @@ READ : 'read';
 
 PRINT : 'print';
 
+INT_TYPE : 'int';
+
+REAL_TYPE : 'real';
+
 ID : ('a'..'z'|'A'..'Z')+;
 
 ARRAY_ID: ('a'..'z'|'A'..'Z')+'[''0'..'9'+']';
@@ -87,4 +91,5 @@ NEWLINE: '\r'? '\n';
 
 WS:   (' '|'\t')+ { skip(); }
     ;
+
 

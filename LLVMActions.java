@@ -319,6 +319,8 @@ public class LLVMActions extends CzajmalBaseListener {
                         LLVMGenerator.readInt(ID);
                     } else if (type.equals("real")) {
                         LLVMGenerator.readReal(ID);
+                    } else if (type.equals("char")) {
+                        LLVMGenerator.readChar(ID);
                     }
                 } else {
                     ctx.getStart().getLine();

@@ -1,3 +1,6 @@
-char{5} s = ["h", "e", "l", "l", "o"]
-char c = s[0]
-print(c)
+char{5} s = "hello"
+s = "olleh"
+int{3} w = [1,2,5]
+real{2} l = [2,4.1]
+char c = s[4]
+print(c,w)

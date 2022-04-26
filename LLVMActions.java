@@ -347,6 +347,16 @@ public class LLVMActions extends CzajmalBaseListener {
                         LLVMGenerator.printReal(ID);
                     } else if (type.equals("char")) {
                         LLVMGenerator.printChar(ID);
+                    } else if (type.contains("char[")) {
+                        String[] split_array_type = type.split("\\[");
+                        String len = split_array_type[1].split("\\]")[0];
+                        for(int i = 0; i < Integer.parseInt(len)-1; i++){
+                            String id = Integer.toString(LLVMGenerator.loadCharArrayValue(ID, Integer.toString(i),len));
+                            LLVMGenerator.printSingleChar(id);
+                        }
+                        String lastEl = Integer.toString(Integer.parseInt(len)-1);
+                        String id = Integer.toString(LLVMGenerator.loadCharArrayValue(ID, lastEl,len));
+                        LLVMGenerator.printFinalChar(id);
                     }
                 } else {
                     error(ctx.getStart().getLine(), ", unknown variable: " + ID);

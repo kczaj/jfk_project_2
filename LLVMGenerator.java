@@ -26,6 +26,15 @@ class LLVMGenerator{
       reg++;
    }
 
+   static void printSingleChar(String id){
+      main_text += "%"+reg+" = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strpsc, i32 0, i32 0), i8 %"+(reg-1)+")\n";
+      reg++;
+   }
+   static void printFinalChar(String id){
+      main_text += "%"+reg+" = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpc, i32 0, i32 0), i8 %"+(reg-1)+")\n";
+      reg++;
+   }
+
    static void readInt(String id){
       main_text += "%"+reg+" = call i32 (i8*, ...) @__isoc99_scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strs, i32 0, i32 0), i32* %"+id+")\n";
       reg++;      
@@ -178,6 +187,7 @@ class LLVMGenerator{
       text += "declare i32 @printf(i8*, ...)\n";
       text += "declare i32 @__isoc99_scanf(i8*, ...)\n";
       text += "@strpc = constant [4 x i8] c\"%c\\0A\\00\"\n";
+      text += "@strpsc = constant [3 x i8] c\"%c\\00\"\n";
       text += "@strp = constant [4 x i8] c\"%d\\0A\\00\"\n";
       text += "@strpd = constant [4 x i8] c\"%f\\0A\\00\"\n";
       text += "@strs = constant [3 x i8] c\"%d\\00\"\n";

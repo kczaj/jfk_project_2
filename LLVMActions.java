@@ -21,6 +21,7 @@ public class LLVMActions extends CzajmalBaseListener {
     HashSet<String> types = new HashSet<String>() {{
         add("int");
         add("real");
+        add("char");
     }};
     HashSet<String> definedFunctions = new HashSet<String>() {{
         add("print");
@@ -47,6 +48,9 @@ public class LLVMActions extends CzajmalBaseListener {
             if (v.type.equals("real")) {
                 LLVMGenerator.assignReal(ID, v.value);
             }
+            if (v.type.equals("char")) {
+                LLVMGenerator.assignChar(ID, v.value);
+            }
         } else {
             try {
                 ID = ctx.declaration().getChild(2).getText();
@@ -61,12 +65,13 @@ public class LLVMActions extends CzajmalBaseListener {
                     error(ctx.getStart().getLine(), "too big array");
                 }
                 for (Value v : argumentsList) {
-
                     if (v.type.equals("ID") && variables.containsKey(v.value)) {
                         if (type.equals("int")) {
                             values.add("%" + LLVMGenerator.loadInt(v.value));
                         } else if (type.equals("real")) {
                             values.add("%" + LLVMGenerator.loadReal(v.value));
+                        } else if (type.equals("char")) {
+                            values.add("%" + LLVMGenerator.loadChar(v.value));
                         }
                     } else if (v.type.equals("ARRAY_ID") && variables.containsKey(v.value)) {
                         String[] split_array_id = v.value.split("\\[");
@@ -76,8 +81,10 @@ public class LLVMActions extends CzajmalBaseListener {
                             values.add("%" + LLVMGenerator.loadIntArrayValue(id, arrId, len));
                         } else if (type.equals("real")) {
                             values.add("%" + LLVMGenerator.loadRealArrayValue(id, arrId, len));
+                        } else if (type.equals("char")){
+                            values.add("%" + LLVMGenerator.loadCharArrayValue(id, arrId, len));
                         }
-                    } else if (v.type.equals("int") || v.type.equals("real")) {
+                    } else if (v.type.equals("int") || v.type.equals("real") || v.type.equals("char")) {
                         values.add(v.value);
                     }
                 }
@@ -86,6 +93,8 @@ public class LLVMActions extends CzajmalBaseListener {
                         LLVMGenerator.assignArrayIntElement(values.get(i), ID, Integer.toString(i), len);
                     } else if (type.equals("real")) {
                         LLVMGenerator.assignArrayRealElement(values.get(i), ID, Integer.toString(i), len);
+                    } else if (type.equals("char")) {
+                        LLVMGenerator.assignArrayCharElement(values.get(i), ID, Integer.toString(i), len);
                     }
                 }
                 argumentsList.clear();
@@ -115,6 +124,9 @@ public class LLVMActions extends CzajmalBaseListener {
             if (v.type.equals("real")) {
                 LLVMGenerator.assignReal(ID, v.value);
             }
+            if (v.type.equals("char")) {
+                LLVMGenerator.assignChar(ID, v.value);
+            }
         } else {
             try {
                 //Get array type and length
@@ -127,12 +139,13 @@ public class LLVMActions extends CzajmalBaseListener {
                     error(ctx.getStart().getLine(), "array size mismatch");
                 }
                 for (Value v : argumentsList) {
-
                     if (v.type.equals("ID") && variables.containsKey(v.value)) {
                         if (type.equals("int")) {
                             values.add("%" + LLVMGenerator.loadInt(v.value));
                         } else if (type.equals("real")) {
                             values.add("%" + LLVMGenerator.loadReal(v.value));
+                        } else if (type.equals("char")) {
+                            values.add("%" + LLVMGenerator.loadChar(v.value));
                         }
                     } else if (v.type.equals("ARRAY_ID") && variables.containsKey(v.value)) {
                         String[] split_array_id = v.value.split("\\[");
@@ -142,8 +155,10 @@ public class LLVMActions extends CzajmalBaseListener {
                             values.add("%" + LLVMGenerator.loadIntArrayValue(id, arrId, len));
                         } else if (type.equals("real")) {
                             values.add("%" + LLVMGenerator.loadRealArrayValue(id, arrId, len));
+                        } else if (type.equals("char")) {
+                            values.add("%" + LLVMGenerator.loadCharArrayValue(id, arrId, len));
                         }
-                    } else if (v.type.equals("int") || v.type.equals("real")) {
+                    } else if (v.type.equals("int") || v.type.equals("real") || v.type.equals("char")) {
                         values.add(v.value);
                     }
                 }
@@ -152,6 +167,8 @@ public class LLVMActions extends CzajmalBaseListener {
                         LLVMGenerator.assignArrayIntElement(values.get(i), ID, Integer.toString(i), len);
                     } else if (type.equals("real")) {
                         LLVMGenerator.assignArrayRealElement(values.get(i), ID, Integer.toString(i), len);
+                    } else if (type.equals("char")) {
+                        LLVMGenerator.assignArrayCharElement(values.get(i), ID, Integer.toString(i), len);
                     }
                 }
                 argumentsList.clear();
@@ -195,6 +212,36 @@ public class LLVMActions extends CzajmalBaseListener {
     }
 
     @Override
+    public void exitStringIdAssignment(CzajmalParser.StringIdAssignmentContext ctx) {
+        //Get array id and element id
+        String ARRAY_ID = ctx.ARRAY_ID().getText();
+        String[] split_array_id = ARRAY_ID.split("\\[");
+        String id = split_array_id[0];
+        String arrId = split_array_id[1].split("\\]")[0];
+        if (!variables.containsKey(id)) {
+            error(ctx.getStart().getLine(), "variable not declared");
+        }
+        //Get array type and length
+        String arrType = variables.get(id);
+        String[] split_array_type = arrType.split("\\[");
+        String type = split_array_type[0];
+        String len = split_array_type[1].split("\\]")[0];
+
+        if (Integer.parseInt(arrId) >= Integer.parseInt(len) || Integer.parseInt(arrId) < 0){
+            error(ctx.getStart().getLine(), "mazanie po pamieci :) (:");
+        }
+        if (!type.equals("char")){
+            error(ctx.getStart().getLine(), "char - string found");
+        }
+
+        Value v = stack.pop();
+        if (!v.type.equals(type)) {
+            error(ctx.getStart().getLine(), "arrayId assignment type mismatch");
+        }
+        LLVMGenerator.assignArrayCharElement(v.value, id, arrId, len);
+    }
+
+    @Override
     public void exitDeclaration(CzajmalParser.DeclarationContext ctx) {
         String ID = ctx.ID().getText();
         String TYPE = ctx.type().getText();
@@ -208,6 +255,8 @@ public class LLVMActions extends CzajmalBaseListener {
                         LLVMGenerator.declareIntArray(ID, ARRAY_LEN);
                     } else if (TYPE.equals("real")) {
                         LLVMGenerator.declareRealArray(ID, ARRAY_LEN);
+                    } else if (TYPE.equals("char")) {
+                        LLVMGenerator.declareCharArray(ID, ARRAY_LEN);
                     }
                 } catch (NullPointerException e) {
                     variables.put(ID, TYPE);
@@ -215,6 +264,8 @@ public class LLVMActions extends CzajmalBaseListener {
                         LLVMGenerator.declareInt(ID);
                     } else if (TYPE.equals("real")) {
                         LLVMGenerator.declareReal(ID);
+                    } else if (TYPE.equals("char")) {
+                        LLVMGenerator.declareChar(ID);
                     }
                 }
             } else {
@@ -246,6 +297,8 @@ public class LLVMActions extends CzajmalBaseListener {
                         LLVMGenerator.printInt(ID);
                     } else if (type.equals("real")) {
                         LLVMGenerator.printReal(ID);
+                    } else if (type.equals("char")) {
+                        LLVMGenerator.printChar(ID);
                     }
                 } else {
                     ctx.getStart().getLine();
@@ -299,6 +352,18 @@ public class LLVMActions extends CzajmalBaseListener {
         } catch (NullPointerException e) {
 
         }
+        try {
+            String character = ctx.STRING().getText();
+            if( character.length() > 3 ){
+                error(ctx.getStart().getLine(), "char: string found");
+            }
+            character = character.split("\"")[1];
+            int charNum = (int) character.charAt(0);
+            argumentsList.add(new Value("char", Integer.toString(charNum)));
+
+        } catch (NullPointerException e){
+
+        }
 
         try {
             argumentsList.add(new Value("ARRAY_ID", ctx.ARRAY_ID().getText()));
@@ -318,6 +383,11 @@ public class LLVMActions extends CzajmalBaseListener {
     }
 
     @Override
+    public void exitString(CzajmalParser.StringContext ctx) {
+        stack.push( new Value("string", ctx.STRING().getText()) );
+    }
+
+    @Override
     public void exitId(CzajmalParser.IdContext ctx) {
         String ID = ctx.ID().getText();
         if (variables.containsKey(ID)) {
@@ -327,6 +397,8 @@ public class LLVMActions extends CzajmalBaseListener {
                 reg = LLVMGenerator.loadInt(ID);
             } else if (type.equals("real")) {
                 reg = LLVMGenerator.loadReal(ID);
+            } else if (type.equals("char")) {
+                reg = LLVMGenerator.loadChar(ID);
             }
             stack.push(new Value(type, "%" + reg));
         } else {
@@ -350,6 +422,8 @@ public class LLVMActions extends CzajmalBaseListener {
                 reg = LLVMGenerator.loadIntArrayValue(id, arrId, len);
             } else if (type.equals("real")) {
                 reg = LLVMGenerator.loadRealArrayValue(id, arrId, len);
+            } else if (type.equals("char")){
+                reg = LLVMGenerator.loadCharArrayValue(id, arrId, len);
             }
             stack.push(new Value(type, "%" + reg));
         } else {

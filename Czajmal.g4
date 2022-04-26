@@ -9,7 +9,7 @@ statement: declaration
 
 // VARIABLES AND OPERATIONS
 
-type: INT_TYPE | REAL_TYPE;
+type: INT_TYPE | REAL_TYPE | CHAR_TYPE;
 
 array_declare: '{' INT '}';
 
@@ -24,10 +24,12 @@ declaration: type ID
 assignment: declaration '=' operation #declarationAssignment
             | ID '=' operation  #idAssignment
             | ARRAY_ID '=' expr0    #arrayIdAssignment
+            | ARRAY_ID '=' STRING   #stringIdAssignment
             ;
 
-operation: expr0
-          | array
+operation: expr0    #expression
+          | array   #arrayOp
+          | STRING  #string
 ;
 
 expr0:  expr1            #single0
@@ -66,9 +68,11 @@ arguments: value ',' arguments
         | value
         | /* epsilon */;
 
-value: ID | INT | REAL | ARRAY_ID;
+value: ID | INT | REAL | STRING | ARRAY_ID;
 
 //TERMINALS
+
+STRING : '"' ( ~('\\'|'"') )* '"';
 
 READ : 'read';
 
@@ -77,6 +81,8 @@ PRINT : 'print';
 INT_TYPE : 'int';
 
 REAL_TYPE : 'real';
+
+CHAR_TYPE : 'char';
 
 ID : ('a'..'z'|'A'..'Z')+;
 

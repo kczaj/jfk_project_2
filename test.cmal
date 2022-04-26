@@ -1,5 +1,3 @@
-int{5} arr = [1, 2, 3, 4, 5]
-arr[1] = 2
-arr = [4,2,1,3]
-int a = arr[0]
-print(a)
+char{5} s = ["h", "e", "l", "l", "o"]
+char c = s[0]
+print(c)

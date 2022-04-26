@@ -19,6 +19,13 @@ class LLVMGenerator{
       reg++;
    }
 
+   static void printChar(String id){
+      main_text += "%"+reg+" = load i8, i8* %"+id+"\n";
+      reg++;
+      main_text += "%"+reg+" = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @strpc, i32 0, i32 0), i8 %"+(reg-1)+")\n";
+      reg++;
+   }
+
    static void readInt(String id){
       main_text += "%"+reg+" = call i32 (i8*, ...) @__isoc99_scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @strs, i32 0, i32 0), i32* %"+id+")\n";
       reg++;      
@@ -37,12 +44,18 @@ class LLVMGenerator{
       main_text += "%"+id+" = alloca double\n";
    }
 
+   static void declareChar(String id) { main_text += "%"+id+" = alloca i8\n";}
+
    static void declareIntArray(String id, String len){
       main_text += "%"+id+" = alloca ["+len+" x i32]\n";
    }
 
    static void declareRealArray(String id, String len){
       main_text += "%"+id+" = alloca ["+len+" x double]\n";
+   }
+
+   static void declareCharArray(String id, String len) {
+      main_text += "%"+id+" = alloca ["+len+" x i8]\n";
    }
 
    static void assignInt(String id, String value){
@@ -53,6 +66,8 @@ class LLVMGenerator{
       main_text += "store double "+value+", double* %"+id+"\n";
    }
 
+   static void assignChar(String id, String value) {main_text += "store i8 "+value+", i8* %"+id+"\n";}
+
    static void assignArrayIntElement(String value, String arrayId, String elemId, String len) {
       main_text += "%"+reg+" = getelementptr ["+len+" x i32], ["+len+" x i32]* %"+arrayId+", i32 0, i32 "+elemId+"\n";
       main_text += "store i32 "+value+", i32* %"+reg+"\n";
@@ -60,8 +75,14 @@ class LLVMGenerator{
    }
 
    static void assignArrayRealElement(String value, String arrayId, String elemId, String len) {
-      main_text += "%"+reg+" = getelementptr ["+len+" x double], ["+len+" x double]* %"+arrayId+", double 0, double "+elemId+"\n";
+      main_text += "%"+reg+" = getelementptr ["+len+" x double], ["+len+" x double]* %"+arrayId+", i32 0, i32 "+elemId+"\n";
       main_text += "store double "+value+", double* %"+reg+"\n";
+      reg++;
+   }
+
+   static void assignArrayCharElement(String value, String arrayId, String elemId, String len) {
+      main_text += "%"+reg+" = getelementptr ["+len+" x i8], ["+len+" x i8]* %"+arrayId+", i32 0, i32 "+elemId+"\n";
+      main_text += "store i8 "+value+", i8* %"+reg+"\n";
       reg++;
    }
 
@@ -117,6 +138,12 @@ class LLVMGenerator{
       return reg-1;
    }
 
+   static int loadChar(String id){
+      main_text += "%"+reg+" = load i8, i8* %"+id+"\n";
+      reg++;
+      return reg-1;
+   }
+
    static int loadIntArrayValue(String id, String arrId, String len){
       main_text += "%"+reg+" = getelementptr ["+len+" x i32], ["+len+" x i32]* %"+id+", i32 0, i32 "+arrId+"\n";
       reg++;
@@ -126,9 +153,17 @@ class LLVMGenerator{
    }
 
    static int loadRealArrayValue(String id, String arrId, String len){
-      main_text += "%"+reg+" = getelementptr ["+len+" x double], ["+len+" x double]* %"+id+", double 0, double "+arrId+"\n";
+      main_text += "%"+reg+" = getelementptr ["+len+" x double], ["+len+" x double]* %"+id+", i32 0, i32 "+arrId+"\n";
       reg++;
       main_text += "%"+reg+" = load double, double* %"+(reg-1)+"\n";
+      reg++;
+      return reg-1;
+   }
+
+   static int loadCharArrayValue(String id, String arrId, String len){
+      main_text += "%"+reg+" = getelementptr ["+len+" x i8], ["+len+" x i8]* %"+id+", i32 0, i32 "+arrId+"\n";
+      reg++;
+      main_text += "%"+reg+" = load i8, i8* %"+(reg-1)+"\n";
       reg++;
       return reg-1;
    }
@@ -137,6 +172,7 @@ class LLVMGenerator{
       String text = "";
       text += "declare i32 @printf(i8*, ...)\n";
       text += "declare i32 @__isoc99_scanf(i8*, ...)\n";
+      text += "@strpc = constant [4 x i8] c\"%c\\0A\\00\"\n";
       text += "@strp = constant [4 x i8] c\"%d\\0A\\00\"\n";
       text += "@strpd = constant [4 x i8] c\"%f\\0A\\00\"\n";
       text += "@strs = constant [3 x i8] c\"%d\\00\"\n";

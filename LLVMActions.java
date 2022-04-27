@@ -284,7 +284,6 @@ public class LLVMActions extends CzajmalBaseListener {
             error(ctx.getStart().getLine(), "char - string found");
         }
 
-        Value v = stack.pop();
         String c = ctx.STRING().getText();
         if (c.length() > 3) {
             error(ctx.getStart().getLine(), "char - string found");

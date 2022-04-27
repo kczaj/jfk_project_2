@@ -285,10 +285,12 @@ public class LLVMActions extends CzajmalBaseListener {
         }
 
         Value v = stack.pop();
-        if (!v.type.equals(type)) {
-            error(ctx.getStart().getLine(), "arrayId assignment type mismatch");
+        String c = ctx.STRING().getText();
+        if (c.length() > 3) {
+            error(ctx.getStart().getLine(), "char - string found");
         }
-        LLVMGenerator.assignArrayCharElement(v.value, id, arrId, len);
+        int charNum = (int) c.charAt(1);
+        LLVMGenerator.assignArrayCharElement(Integer.toString(charNum), id, arrId, len);
     }
 
     @Override

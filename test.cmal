@@ -1,2 +1,33 @@
+int x
+read(x)
+print(x)
+real y
+read(y)
+print(y)
+
+int z = 4
+z = z + 2 * 3 - 3
+print(z)
+real a
+a = 1.1 * 1.1 + 5.4 / 2.7
+print(a)
+
+int{3} arr = [1, 2, 3]
+int p = arr[1]
+print(p)
+
+real{2} arrR = [2.1, 24.2]
+real pr = arrR[1]
+print(pr)
+arrR = [222.1, 2422.2]
+pr = arrR[1]
+print(pr)
+
 char{5} s = "hello"
 print(s)
+s = "olleh"
+print(s)
+s[2] = "x"
+print(s)
+char c = s[0]
+print(c)

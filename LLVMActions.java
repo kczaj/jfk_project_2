@@ -40,7 +40,7 @@ public class LLVMActions extends CzajmalBaseListener {
     @Override
     public void exitProg(CzajmalParser.ProgContext ctx) {
         LLVMGenerator.close_main();
-        System.out.println( LLVMGenerator.generate() );
+        System.out.println(LLVMGenerator.generate());
     }
 
     @Override
@@ -79,11 +79,11 @@ public class LLVMActions extends CzajmalBaseListener {
             }
             Value v = stack.pop();
             if (variables.containsKey(ID)) {
-                if(!v.type.equals(variables.get(ID))){
+                if (!v.type.equals(variables.get(ID))) {
                     error(ctx.getStart().getLine(), "assignment type mismatch");
                 }
             } else {
-                if(!v.type.equals(globalVariables.get(ID))){
+                if (!v.type.equals(globalVariables.get(ID))) {
                     error(ctx.getStart().getLine(), "assignment type mismatch");
                 }
             }
@@ -101,7 +101,7 @@ public class LLVMActions extends CzajmalBaseListener {
                 ID = ctx.declaration().getChild(2).getText();
                 //Get array type and length
                 String arrType = variables.get(ID);
-                if(arrType == null) {
+                if (arrType == null) {
                     arrType = globalVariables.get(ID);
                 }
                 String[] split_array_type = arrType.split("\\[");
@@ -167,7 +167,7 @@ public class LLVMActions extends CzajmalBaseListener {
         if (ArrayOperation.charAt(0) == '"') {
             try {
                 String arrType = variables.get(ID);
-                if(arrType == null){
+                if (arrType == null) {
                     arrType = globalVariables.get(ID);
                 }
                 String[] split_array_type = arrType.split("\\[");
@@ -191,11 +191,11 @@ public class LLVMActions extends CzajmalBaseListener {
         } else if (ArrayOperation.charAt(0) != '[') {
             Value v = stack.pop();
             if (variables.containsKey(ID)) {
-                if(!v.type.equals(variables.get(ID))){
+                if (!v.type.equals(variables.get(ID))) {
                     error(ctx.getStart().getLine(), "assignment type mismatch");
                 }
             } else {
-                if(!v.type.equals(globalVariables.get(ID))){
+                if (!v.type.equals(globalVariables.get(ID))) {
                     error(ctx.getStart().getLine(), "assignment type mismatch");
                 }
             }
@@ -212,7 +212,7 @@ public class LLVMActions extends CzajmalBaseListener {
             try {
                 //Get array type and length
                 String arrType = variables.get(ID);
-                if(arrType == null){
+                if (arrType == null) {
                     arrType = globalVariables.get(ID);
                 }
                 String[] split_array_type = arrType.split("\\[");
@@ -278,7 +278,7 @@ public class LLVMActions extends CzajmalBaseListener {
         }
         //Get array type and length
         String arrType = variables.get(id);
-        if(arrType == null){
+        if (arrType == null) {
             arrType = globalVariables.get(id);
         }
         String[] split_array_type = arrType.split("\\[");
@@ -313,7 +313,7 @@ public class LLVMActions extends CzajmalBaseListener {
         }
         //Get array type and length
         String arrType = variables.get(id);
-        if(arrType == null){
+        if (arrType == null) {
             arrType = globalVariables.get(id);
         }
         String[] split_array_type = arrType.split("\\[");
@@ -345,7 +345,7 @@ public class LLVMActions extends CzajmalBaseListener {
                 try {
                     String ARRAY_LEN = ctx.array_declare().getChild(1).getText();
 
-                    if(global){
+                    if (global) {
                         globalVariables.put(ID, TYPE + '[' + ARRAY_LEN + ']');
                     } else {
                         variables.put(ID, TYPE + '[' + ARRAY_LEN + ']');
@@ -358,7 +358,7 @@ public class LLVMActions extends CzajmalBaseListener {
                         LLVMGenerator.declareCharArray(ID, ARRAY_LEN, global);
                     }
                 } catch (NullPointerException e) {
-                    if(global){
+                    if (global) {
                         globalVariables.put(ID, TYPE);
                     } else {
                         variables.put(ID, TYPE);
@@ -387,7 +387,7 @@ public class LLVMActions extends CzajmalBaseListener {
                 Value argument = argumentsList.get(0);
                 String ID = argument.value;
                 String type = variables.get(ID);
-                if(type == null){
+                if (type == null) {
                     type = globalVariables.get(ID);
                 }
                 if (type != null) {
@@ -400,12 +400,12 @@ public class LLVMActions extends CzajmalBaseListener {
                     } else if (type.contains("char[")) {
                         String[] split_array_type = type.split("\\[");
                         String len = split_array_type[1].split("\\]")[0];
-                        for(int i = 0; i < Integer.parseInt(len)-1; i++){
-                            String id = Integer.toString(LLVMGenerator.loadCharArrayValue(resolveScope(ID), Integer.toString(i),len));
+                        for (int i = 0; i < Integer.parseInt(len) - 1; i++) {
+                            String id = Integer.toString(LLVMGenerator.loadCharArrayValue(resolveScope(ID), Integer.toString(i), len));
                             LLVMGenerator.printSingleChar(id);
                         }
-                        String lastEl = Integer.toString(Integer.parseInt(len)-1);
-                        String id = Integer.toString(LLVMGenerator.loadCharArrayValue(resolveScope(ID), lastEl,len));
+                        String lastEl = Integer.toString(Integer.parseInt(len) - 1);
+                        String id = Integer.toString(LLVMGenerator.loadCharArrayValue(resolveScope(ID), lastEl, len));
                         LLVMGenerator.printFinalChar(id);
                     }
                 } else {
@@ -419,7 +419,7 @@ public class LLVMActions extends CzajmalBaseListener {
                 Value argument = argumentsList.get(0);
                 String ID = argument.value;
                 String type = variables.get(ID);
-                if(type == null){
+                if (type == null) {
                     type = globalVariables.get(ID);
                 }
                 if (type != null) {
@@ -499,7 +499,7 @@ public class LLVMActions extends CzajmalBaseListener {
         String ID = ctx.ID().getText();
         if (variables.containsKey(ID) || globalVariables.containsKey(ID)) {
             String type = variables.get(ID);
-            if(type == null){
+            if (type == null) {
                 type = globalVariables.get(ID);
             }
             int reg = -1;
@@ -524,7 +524,7 @@ public class LLVMActions extends CzajmalBaseListener {
         String arrId = split_array_id[1].split("\\]")[0];
         if (variables.containsKey(id) || globalVariables.containsKey(id)) {
             String arrType = variables.get(id);
-            if(arrType == null){
+            if (arrType == null) {
                 arrType = globalVariables.get(id);
             }
             String[] split_array_type = arrType.split("\\[");
@@ -616,15 +616,74 @@ public class LLVMActions extends CzajmalBaseListener {
         }
     }
 
-    public String resolveScope(String ID){
-        String id;
-        if( global ){
-            id = "@"+ID;
+    @Override
+    public void enterBlockif(CzajmalParser.BlockifContext ctx) {
+        global = false;
+        LLVMGenerator.ifstart();
+    }
+
+    @Override
+    public void exitBlockif(CzajmalParser.BlockifContext ctx) {
+        LLVMGenerator.ifend();
+    }
+
+    @Override
+    public void exitBlockelse(CzajmalParser.BlockelseContext ctx) {
+        LLVMGenerator.elseend();
+        global = true;
+    }
+
+    @Override
+    public void exitContition(CzajmalParser.ContitionContext ctx) {
+        String ID = ctx.ID().getText();
+        String operation = ctx.if_operation().getText();
+        String value = ctx.comparable_value().getText();
+
+        if (globalVariables.containsKey(ID) || variables.containsKey(ID)) {
+            String type = "";
+            if (globalVariables.containsKey(ID)) {
+                type = globalVariables.get(ID);
+            } else if (variables.containsKey(ID)) {
+                type = variables.get(ID);
+            }
+
+            if ((type.equals("int") && value.contains("\\.")) || (type.equals("real") && !value.contains("\\."))) {
+                error(ctx.getStart().getLine(), "wrong type comparison");
+            }
+            String operation_text = "";
+            switch (operation) {
+                case "==":
+                    operation_text = "eq";
+                    break;
+                case "!=":
+                    operation_text = "ne";
+                    break;
+                case "<":
+                    operation_text = "ult";
+                    break;
+                case ">":
+                    operation_text = "ugt";
+                    break;
+            }
+            if (type.equals("int")) {
+                LLVMGenerator.icmp(resolveScope(ID), value, "i32", operation_text);
+            } else if (type.equals("real")) {
+                LLVMGenerator.icmp(resolveScope(ID), value, "double", operation_text);
+            }
         } else {
-            if( !variables.containsKey(ID) ){
-                id = "@"+ID;
+            error(ctx.getStart().getLine(), "variable not defined");
+        }
+    }
+
+    public String resolveScope(String ID) {
+        String id;
+        if (global) {
+            id = "@" + ID;
+        } else {
+            if (!variables.containsKey(ID)) {
+                id = "@" + ID;
             } else {
-                id = "%"+ID;
+                id = "%" + ID;
             }
         }
         return id;

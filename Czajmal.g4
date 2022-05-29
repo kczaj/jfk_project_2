@@ -11,11 +11,15 @@ statement: declaration
         ;
 
 // CONDITIONS
-ifblock: IF ID condition value BEGIN blockif ENDIF ELSE blockif ENDELSE;
+ifblock: IF contition BEGIN blockif ENDIF ELSE blockelse ENDELSE;
 
 blockif: block;
 
-condition: EQUALS #eq
+blockelse: block;
+
+contition: ID if_operation comparable_value;
+
+if_operation: EQUALS #eq
         | NOTEQUALS #neq
         | LESS #ls
         | GREATER #gr
@@ -83,6 +87,8 @@ arguments: value ',' arguments
         | /* epsilon */;
 
 value: ID | INT | REAL | STRING | ARRAY_ID;
+
+comparable_value: INT | REAL;
 
 //TERMINALS
 

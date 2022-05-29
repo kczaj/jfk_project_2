@@ -1,6 +1,6 @@
 grammar Czajmal;
 
-prog: block;
+prog: (function? NEWLINE)* block;
 
 block: (statement? NEWLINE)*;
 
@@ -82,6 +82,15 @@ expr4:   INT            #int
 
 //FUNCTIONS
 
+function: type FUNCTION ID fparams BEGIN fblock ENDFUNCTION;
+
+fblock: block;
+
+fparams: type ID ',' fparams
+        | type ID
+        | /* epsilon */
+        ;
+
 call_function: function_name '(' arguments ')';
 
 function_name: defined_functions
@@ -112,6 +121,8 @@ LESSTHAN: '<=';
 GREATERTHAN: '>=';
 LOOP: 'loop';
 ENDLOOP: 'endloop';
+FUNCTION: 'function';
+ENDFUNCTION: 'endfunction';
 
 STRING : '"' ( ~('\\'|'"') )* '"';
 

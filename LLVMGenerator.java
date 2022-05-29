@@ -5,6 +5,7 @@ class LLVMGenerator {
     static String header_text = "";
     static String main_text = "";
     static String buffer = "";
+    static int main_tmp = 1;
     static int reg = 1;
     static int br = 0;
     static Stack<Integer> brstack = new Stack<Integer>();
@@ -283,6 +284,26 @@ class LLVMGenerator {
         int b = brstack.pop();
         buffer += "br label %cond"+b+"\n";
         buffer += "false"+b+":\n";
+    }
+
+    static void functionstart(String id, String type){
+        main_text += buffer;
+        main_tmp = reg;
+        buffer = "define "+type+" @"+id+"() nounwind {\n";
+        reg = 1;
+    }
+
+    static void functionend(String type){
+        buffer += "ret "+type+" %"+(reg-1)+"\n";
+        buffer += "}\n";
+        header_text += buffer;
+        buffer = "";
+        reg = main_tmp;
+    }
+
+    static void call(String id, String type){
+        buffer += "%"+reg+" = call "+type+" @"+id+"()\n";
+        reg++;
     }
 
     static void close_main() {

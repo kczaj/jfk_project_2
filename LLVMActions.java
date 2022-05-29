@@ -618,7 +618,6 @@ public class LLVMActions extends CzajmalBaseListener {
 
     @Override
     public void enterBlockif(CzajmalParser.BlockifContext ctx) {
-        global = false;
         LLVMGenerator.ifstart();
     }
 
@@ -630,7 +629,6 @@ public class LLVMActions extends CzajmalBaseListener {
     @Override
     public void exitBlockelse(CzajmalParser.BlockelseContext ctx) {
         LLVMGenerator.elseend();
-        global = true;
     }
 
     @Override

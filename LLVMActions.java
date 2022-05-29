@@ -634,7 +634,7 @@ public class LLVMActions extends CzajmalBaseListener {
     }
 
     @Override
-    public void exitContition(CzajmalParser.ContitionContext ctx) {
+    public void exitCondition(CzajmalParser.ContitionContext ctx) {
         String ID = ctx.ID().getText();
         String operation = ctx.if_operation().getText();
         String value = ctx.comparable_value().getText();

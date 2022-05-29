@@ -8,16 +8,21 @@ statement: declaration
         | call_function
         | assignment
         | ifblock
+        | loopblock
         ;
+//LOOP
+loopblock: LOOP ID condition BEGIN blockfor ENDFOR;
+
+blockfor: block;
 
 // CONDITIONS
-ifblock: IF contition BEGIN blockif ENDIF ELSE blockelse ENDELSE;
+ifblock: IF condition BEGIN blockif ENDIF ELSE blockelse ENDELSE;
 
 blockif: block;
 
 blockelse: block;
 
-contition: ID if_operation comparable_value;
+condition: ID if_operation comparable_value;
 
 if_operation: EQUALS #eq
         | NOTEQUALS #neq
@@ -101,6 +106,8 @@ EQUALS: '==';
 NOTEQUALS: '!=';
 GREATER: '>';
 LESS: '<';
+LOOP: 'loop';
+ENDFOR: 'endfor';
 
 STRING : '"' ( ~('\\'|'"') )* '"';
 

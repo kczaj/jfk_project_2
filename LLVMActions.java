@@ -637,55 +637,129 @@ public class LLVMActions extends CzajmalBaseListener {
         String operation = ctx.if_operation().getText();
         String value = ctx.comparable_value().getText();
 
-        if (globalVariables.containsKey(ID) || variables.containsKey(ID)) {
-            String type = "";
-            if (globalVariables.containsKey(ID)) {
-                type = globalVariables.get(ID);
-            } else if (variables.containsKey(ID)) {
-                type = variables.get(ID);
+        if (value.matches("^[a-zA-Z]+$")) {
+            if ((globalVariables.containsKey(ID) || variables.containsKey(ID)) && (globalVariables.containsKey(value) || variables.containsKey(value))) {
+                String type1 = "";
+                if (globalVariables.containsKey(ID)) {
+                    type1 = globalVariables.get(ID);
+                } else if (variables.containsKey(ID)) {
+                    type1 = variables.get(ID);
+                }
+                String type2 = "";
+                if (globalVariables.containsKey(value)) {
+                    type2 = globalVariables.get(value);
+                } else if (variables.containsKey(value)) {
+                    type2 = variables.get(value);
+                }
+                System.err.println("WITAM");
+                if (type1.equals(type2)) {
+                    String operation_text = "";
+                    switch (operation) {
+                        case "==":
+                            operation_text = "eq";
+                            break;
+                        case "!=":
+                            operation_text = "ne";
+                            break;
+                        case "<":
+                            operation_text = "slt";
+                            break;
+                        case ">":
+                            operation_text = "sgt";
+                            break;
+                        case ">=":
+                            operation_text = "sge";
+                            break;
+                        case "<=":
+                            operation_text = "sle";
+                            break;
+                        default:
+                            operation_text = "error";
+                            break;
+                    }
+                    if (operation_text.equals("error")) {
+                        error(ctx.getStart().getLine(), "unsupported operation");
+                    }
+                    if (type1.equals("int")) {
+                        LLVMGenerator.icmp_vars(resolveScope(ID), resolveScope(value), "i32", operation_text);
+                    } else if (type1.equals("real")) {
+                        LLVMGenerator.icmp_vars(resolveScope(ID), resolveScope(value), "double", operation_text);
+                    } else {
+                        error(ctx.getStart().getLine(), "unsupported type");
+                    }
+                } else {
+                    error(ctx.getStart().getLine(), "varaibles have different types");
+                }
+            } else {
+                error(ctx.getStart().getLine(), "variable not defined");
             }
 
-            if ((type.equals("int") && value.contains("\\.")) || (type.equals("real") && !value.contains("\\."))) {
-                error(ctx.getStart().getLine(), "wrong type comparison");
-            }
-            String operation_text = "";
-            switch (operation) {
-                case "==":
-                    operation_text = "eq";
-                    break;
-                case "!=":
-                    operation_text = "ne";
-                    break;
-                case "<":
-                    operation_text = "ult";
-                    break;
-                case ">":
-                    operation_text = "ugt";
-                    break;
-            }
-            if (type.equals("int")) {
-                LLVMGenerator.icmp(resolveScope(ID), value, "i32", operation_text);
-            } else if (type.equals("real")) {
-                LLVMGenerator.icmp(resolveScope(ID), value, "double", operation_text);
-            }
         } else {
-            error(ctx.getStart().getLine(), "variable not defined");
+
+            if (globalVariables.containsKey(ID) || variables.containsKey(ID)) {
+                String type = "";
+                if (globalVariables.containsKey(ID)) {
+                    type = globalVariables.get(ID);
+                } else if (variables.containsKey(ID)) {
+                    type = variables.get(ID);
+                }
+
+                if ((type.equals("int") && value.contains("\\.")) || (type.equals("real") && !value.contains("\\."))) {
+                    error(ctx.getStart().getLine(), "wrong type comparison");
+                }
+                String operation_text = "";
+                switch (operation) {
+                    case "==":
+                        operation_text = "eq";
+                        break;
+                    case "!=":
+                        operation_text = "ne";
+                        break;
+                    case "<":
+                        operation_text = "ult";
+                        break;
+                    case ">":
+                        operation_text = "ugt";
+                        break;
+                    case ">=":
+                        operation_text = "uge";
+                        break;
+                    case "<=":
+                        operation_text = "ule";
+                        break;
+                    default:
+                        operation_text = "error";
+                        break;
+                }
+                if (operation_text.equals("error")) {
+                    error(ctx.getStart().getLine(), "unsupported operation");
+                }
+                if (type.equals("int")) {
+                    LLVMGenerator.icmp_constant(resolveScope(ID), value, "i32", operation_text);
+                } else if (type.equals("real")) {
+                    LLVMGenerator.icmp_constant(resolveScope(ID), value, "double", operation_text);
+                } else {
+                    error(ctx.getStart().getLine(), "unsupported type");
+                }
+            } else {
+                error(ctx.getStart().getLine(), "variable not defined");
+            }
         }
     }
 
     @Override
-    public void enterLoopblock(CzajmalParser.LoopblockContext ctx){
+    public void enterLoopblock(CzajmalParser.LoopblockContext ctx) {
         String ID = ctx.condition().getChild(0).getText();
         LLVMGenerator.loopstart(resolveScope(ID));
     }
 
     @Override
-    public void enterBlockfor(CzajmalParser.BlockforContext ctx){
+    public void enterBlockfor(CzajmalParser.BlockforContext ctx) {
         LLVMGenerator.loopblockstart();
     }
 
     @Override
-    public void exitBlockfor(CzajmalParser.BlockforContext ctx){
+    public void exitBlockfor(CzajmalParser.BlockforContext ctx) {
         LLVMGenerator.loopend();
     }
 

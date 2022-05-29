@@ -227,10 +227,19 @@ class LLVMGenerator {
         return reg - 1;
     }
 
-    static void icmp(String id, String value, String type, String cond) {
+    static void icmp_constant(String id, String value, String type, String cond) {
         buffer += "%" + reg + " = load " + type + ", " + type + "* " + id + "\n";
         reg++;
         buffer += "%" + reg + " = icmp " + cond + " " + type + " %" + (reg - 1) + ", " + value + "\n";
+        reg++;
+    }
+
+    static void icmp_vars(String id1, String id2, String type, String cond) {
+        buffer += "%" + reg + " = load " + type + ", " + type + "* " + id1 + "\n";
+        reg++;
+        buffer += "%" + reg + " = load " + type + ", " + type + "* " + id2 + "\n";
+        reg++;
+        buffer += "%" + reg + " = icmp " + cond + " " + type + " %" + (reg - 2) + ", %" + (reg - 1) + "\n";
         reg++;
     }
 

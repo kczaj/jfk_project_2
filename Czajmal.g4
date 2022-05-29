@@ -28,6 +28,8 @@ if_operation: EQUALS #eq
         | NOTEQUALS #neq
         | LESS #ls
         | GREATER #gr
+        | LESSTHAN #lst
+        | GREATERTHAN #grt
         ;
 
 // VARIABLES AND OPERATIONS
@@ -93,7 +95,7 @@ arguments: value ',' arguments
 
 value: ID | INT | REAL | STRING | ARRAY_ID;
 
-comparable_value: INT | REAL;
+comparable_value: ID | INT | REAL;
 
 //TERMINALS
 
@@ -106,6 +108,8 @@ EQUALS: '==';
 NOTEQUALS: '!=';
 GREATER: '>';
 LESS: '<';
+LESSTHAN: '<=';
+GREATERTHAN: '>=';
 LOOP: 'loop';
 ENDLOOP: 'endloop';
 

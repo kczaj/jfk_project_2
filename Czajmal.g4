@@ -1,10 +1,24 @@
 grammar Czajmal;
 
-prog: (statement? NEWLINE)*;
+prog: block;
+
+block: (statement? NEWLINE)*;
 
 statement: declaration
         | call_function
         | assignment
+        | ifblock
+        ;
+
+// CONDITIONS
+ifblock: IF ID condition value BEGIN blockif ENDIF ELSE blockif ENDELSE;
+
+blockif: block;
+
+condition: EQUALS #eq
+        | NOTEQUALS #neq
+        | LESS #ls
+        | GREATER #gr
         ;
 
 // VARIABLES AND OPERATIONS
@@ -71,6 +85,16 @@ arguments: value ',' arguments
 value: ID | INT | REAL | STRING | ARRAY_ID;
 
 //TERMINALS
+
+IF: 'if';
+ENDIF: 'endif';
+ELSE: 'else';
+ENDELSE: 'endelse';
+BEGIN: 'begin';
+EQUALS: '==';
+NOTEQUALS: '!=';
+GREATER: '>';
+LESS: '<';
 
 STRING : '"' ( ~('\\'|'"') )* '"';
 

@@ -5,6 +5,7 @@ class LLVMGenerator{
    static String main_text = "";
    static String buffer = "";
    static int reg = 1;
+   static int br = 0;
 
    static void printInt(String id){
       buffer += "%"+reg+" = load i32, i32* "+id+"\n";
@@ -221,6 +222,32 @@ class LLVMGenerator{
       buffer += "%"+reg+" = load i8, i8* %"+(reg-1)+"\n";
       reg++;
       return reg-1;
+   }
+
+   static void icmp(String id, String value, String type, String cond){
+      buffer += "%"+reg+" = load "+type+", "+type+"* %"+id+"\n";
+      reg++;
+      buffer += "%"+reg+" = icmp "+cond+" "+type+" %"+(reg-1)+", "+value+"\n";
+      reg++;
+   }
+
+   static void ifstart(){
+      br++;
+      buffer += "br i1 %"+(reg-1)+", label %true"+br+", label %false"+br+"\n";
+      buffer += "true"+br+":\n";
+      brstack.push(br);
+   }
+
+   static void ifend(){
+      int b = brstack.pop();
+      buffer += "br label %end"+b+"\n";
+      buffer += "false"+b+":\n";
+   }
+
+   static void elseend(){
+      int b = brstack.pop();
+      buffer += "br label %end"+b+"\n";
+      buffer += "end"+b+":\n"
    }
 
    static void close_main(){

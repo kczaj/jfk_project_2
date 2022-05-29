@@ -254,6 +254,28 @@ class LLVMGenerator {
         buffer += "end" + b + ":\n";
     }
 
+    static void loopstart(String id/*, String value, String cond*/){
+        br++;
+        buffer += "br label %cond"+br+"\n";
+        buffer += "cond"+br+":\n";
+
+        int tmp = loadInt(id);
+        addInt("%"+Integer.toString(tmp), "1");
+        assignInt(id,"%"+Integer.toString(reg-1));
+    }
+
+    static void loopblockstart(){
+        buffer += "br i1 %"+(reg-1)+", label %true"+br+", label %false"+br+"\n";
+        buffer += "true"+br+":\n";
+        brstack.push(br);
+    }
+
+    static void loopend(){
+        int b = brstack.pop();
+        buffer += "br label %cond"+b+"\n";
+        buffer += "false"+b+":\n";
+    }
+
     static void close_main() {
         main_text += buffer;
     }

@@ -634,7 +634,7 @@ public class LLVMActions extends CzajmalBaseListener {
     }
 
     @Override
-    public void exitCondition(CzajmalParser.ContitionContext ctx) {
+    public void exitCondition(CzajmalParser.ConditionContext ctx) {
         String ID = ctx.ID().getText();
         String operation = ctx.if_operation().getText();
         String value = ctx.comparable_value().getText();
@@ -673,6 +673,22 @@ public class LLVMActions extends CzajmalBaseListener {
         } else {
             error(ctx.getStart().getLine(), "variable not defined");
         }
+    }
+
+    @Override
+    public void enterLoopblock(CzajmalParser.LoopblockContext ctx){
+        String ID = ctx.condition().getChild(0).getText();
+        LLVMGenerator.loopstart(resolveScope(ID));
+    }
+
+    @Override
+    public void enterBlockfor(CzajmalParser.BlockforContext ctx){
+        LLVMGenerator.loopblockstart();
+    }
+
+    @Override
+    public void exitBlockfor(CzajmalParser.BlockforContext ctx){
+        LLVMGenerator.loopend();
     }
 
     public String resolveScope(String ID) {

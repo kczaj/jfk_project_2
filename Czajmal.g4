@@ -11,7 +11,7 @@ statement: declaration
         | loopblock
         ;
 //LOOP
-loopblock: LOOP ID condition BEGIN blockfor ENDFOR;
+loopblock: LOOP condition BEGIN blockfor ENDLOOP;
 
 blockfor: block;
 
@@ -107,7 +107,7 @@ NOTEQUALS: '!=';
 GREATER: '>';
 LESS: '<';
 LOOP: 'loop';
-ENDFOR: 'endfor';
+ENDLOOP: 'endloop';
 
 STRING : '"' ( ~('\\'|'"') )* '"';
 

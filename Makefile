@@ -12,5 +12,5 @@ compile2:
 compile:
 	javac -cp $(ANTLR):output:. Main.java
 test:
-	java -cp $(ANTLR):output:. Main test.cmal > test.ll
+	java -cp $(ANTLR):output:. Main testFun.cmal > test.ll
 	lli test.ll

@@ -289,8 +289,17 @@ class LLVMGenerator {
     static void functionstart(String id, String type){
         main_text += buffer;
         main_tmp = reg;
-        buffer = "define "+type+" @"+id+"() nounwind {\n";
+        buffer = "define "+type+" @"+id+"(";
         reg = 1;
+    }
+
+    static void functionparams(String id, String type, boolean last){
+        buffer+=type+"* %"+id;
+        if(!last){
+            buffer+=", ";
+        } else {
+            buffer += ") nounwind {\n";
+        }
     }
 
     static void functionend(String type){
@@ -302,7 +311,20 @@ class LLVMGenerator {
     }
 
     static void call(String id, String type){
-        buffer += "%"+reg+" = call "+type+" @"+id+"()\n";
+        buffer += "%"+reg+" = call "+type+" @"+id+"(";
+    }
+
+    static void callparams(String id, String type, boolean last){
+        buffer+=type+"* "+id;
+        if(!last){
+            buffer+=", ";
+        } else {
+            buffer += ")\n";
+        }
+    }
+
+    static void callfinal(String id, String type){
+        buffer += "store "+type+" %" + reg + ", "+type+"* " + id + "\n";
         reg++;
     }
 

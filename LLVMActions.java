@@ -28,6 +28,9 @@ public class LLVMActions extends CzajmalBaseListener {
         add("print");
         add("read");
     }};
+
+    HashMap<String,ArrayList<String>> functions = new HashMap<String,ArrayList<String>>();
+
     List<Value> argumentsList = new ArrayList<Value>();
     Stack<Value> stack = new Stack<Value>();
     Boolean global;
@@ -436,10 +439,65 @@ public class LLVMActions extends CzajmalBaseListener {
             } else {
                 error(ctx.getStart().getLine(), ", to many arguments in function read. Expected 1, Got: " + argumentsList.size());
             }
+        } else {
+            ArrayList<String> args = functions.get(FUNC_NAME);
+            if(args == null) {
+                error(ctx.getStart().getLine(), ", no such function: " + FUNC_NAME);
+            }
+            if(argumentsList.size() != args.size()-1){
+                error(ctx.getStart().getLine(), ", wrong number of arguments");
+            }
+            if(args.get(0).equals("int")){
+                LLVMGenerator.call(FUNC_NAME, "i32");
+            } else if(args.get(0).equals("real")){
+                LLVMGenerator.call(FUNC_NAME, "double");
+            } else {
+                error(ctx.getStart().getLine(), ", invalid type");
+            }
+            boolean last = false;
+            for(int i = 0; i < argumentsList.size(); i++){
+                if(i == argumentsList.size()-1){
+                    last = true;
+                }
+                Value argument = argumentsList.get(i);
+                String argType = variables.get(argument.value);
+                if(argType == null){
+                    argType = globalVariables.get(argument.value);
+                }
+                String requiredArg = args.get(i+1);
+                if(argType.equals(requiredArg)){
+                    if(argType.equals("int")){
+                        argType = "i32";
+                    } else if(argType.equals("real")){
+                        argType = "double";
+                    } else {
+                        error(ctx.getStart().getLine(), "wrong type");
+                    }
+                    LLVMGenerator.callparams(resolveScope(argument.value), argType, last);
+                }
+            }
         }
         argumentsList.clear();
     }
 
+    @Override
+    public void exitFunctionAssignment(CzajmalParser.FunctionAssignmentContext ctx) {
+        String id = ctx.ID().getText();
+        String type = variables.get(id);
+        if(type == null){
+            type = globalVariables.get(id);
+        }
+        if(type == null){
+            error(ctx.getStart().getLine(), "variable not defined");
+        }
+        if(type.equals("int")){
+            LLVMGenerator.callfinal(resolveScope(id), "i32");
+        } else if(type.equals("real")){
+            LLVMGenerator.callfinal(resolveScope(id), "double");
+        } else {
+            error(ctx.getStart().getLine(), "wrong type");
+        }
+    }
     @Override
     public void exitValue(CzajmalParser.ValueContext ctx) {
         try {
@@ -761,6 +819,65 @@ public class LLVMActions extends CzajmalBaseListener {
     @Override
     public void exitBlockfor(CzajmalParser.BlockforContext ctx) {
         LLVMGenerator.loopend();
+    }
+
+    @Override
+    public void enterFunction(CzajmalParser.FunctionContext ctx) {
+        global = false;
+        String id = ctx.ID().getText();
+        String type = ctx.type().getText();
+        functions.put(id, new ArrayList<String>());
+        functions.get(id).add(type);
+        if(type.equals("int")){
+            type = "i32";
+        } else if(type.equals("real")){
+            type = "double";
+        } else {
+            error(ctx.getStart().getLine(), "unsupported return parameter");
+        }
+        LLVMGenerator.functionstart(id, type);
+        CzajmalParser.FparamsContext fp = ctx.fparams();
+        while(fp != null){
+            CzajmalParser.FparamsContext nfp = fp.fparams();
+            String paramId = fp.ID().getText();
+            String paramType = fp.type().getText();
+            variables.put(paramId, paramType);
+            functions.get(id).add(paramType);
+            boolean last = false;
+            if(nfp == null){
+                last = true;
+            }
+            if(paramType.equals("int")){
+                paramType = "i32";
+            } else if(paramType.equals("real")){
+                paramType = "double";
+            } else {
+                error(ctx.getStart().getLine(), "unsupported function parameter");
+            }
+            LLVMGenerator.functionparams(paramId, paramType, last);
+            fp = nfp;
+        }
+    }
+
+    @Override
+    public void exitReturnstatement(CzajmalParser.ReturnstatementContext ctx){
+        String ID = ctx.ID().getText();
+        String TYPE = variables.get(ID);
+        if(TYPE == null){
+            error(ctx.getStart().getLine(), "variable not defined");
+        }
+        if(TYPE.equals("int")){
+            LLVMGenerator.loadInt(resolveScope(ID));
+            TYPE = "i32";
+        } else if(TYPE.equals("real")){
+            LLVMGenerator.loadReal(resolveScope(ID));
+            TYPE = "double";
+        } else {
+            error(ctx.getStart().getLine(), "unsupported return parameter");
+        }
+        LLVMGenerator.functionend(TYPE);
+        variables = new HashMap<String, String>();
+        global = true;
     }
 
     public String resolveScope(String ID) {

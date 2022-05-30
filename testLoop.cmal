@@ -1,0 +1,10 @@
+int x = 0
+int y = 0
+char{1} s = "#"
+loop x < 5 begin
+    y = 0
+    print(x)
+    loop y < 3 begin
+        print(s)
+    endloop
+endloop

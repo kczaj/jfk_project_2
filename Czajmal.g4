@@ -47,6 +47,7 @@ declaration: type ID
             | type array_declare ID;
 
 assignment: declaration '=' operation #declarationAssignment
+            | ID '=' call_function #functionAssignment
             | ID '=' operation  #idAssignment
             | ARRAY_ID '=' expr0    #arrayIdAssignment
             | ARRAY_ID '=' STRING   #stringIdAssignment
@@ -82,7 +83,9 @@ expr4:   INT            #int
 
 //FUNCTIONS
 
-function: type FUNCTION ID fparams BEGIN fblock ENDFUNCTION;
+function: type FUNCTION ID '(' fparams ')' BEGIN fblock returnstatement ENDFUNCTION;
+
+returnstatement: RETURN ID NEWLINE;
 
 fblock: block;
 
@@ -96,7 +99,7 @@ call_function: function_name '(' arguments ')';
 function_name: defined_functions
 /* tu będzie do rozszerzenia kiedy bedziemy robić funkcje definiowane przez uzytkownikow*/ ;
 
-defined_functions: READ | PRINT;
+defined_functions: READ | PRINT | ID;
 
 arguments: value ',' arguments
         | value
@@ -123,6 +126,7 @@ LOOP: 'loop';
 ENDLOOP: 'endloop';
 FUNCTION: 'function';
 ENDFUNCTION: 'endfunction';
+RETURN: 'return';
 
 STRING : '"' ( ~('\\'|'"') )* '"';
 

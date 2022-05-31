@@ -798,7 +798,6 @@ public class LLVMActions extends CzajmalBaseListener {
                 } else if (variables.containsKey(value)) {
                     type2 = variables.get(value);
                 }
-                System.err.println("WITAM");
                 if (type1.equals(type2)) {
                     String operation_text = "";
                     switch (operation) {

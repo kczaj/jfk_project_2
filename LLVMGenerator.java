@@ -80,6 +80,14 @@ class LLVMGenerator {
         }
     }
 
+    static void declareStructVar(String id, String type, Boolean global) {
+        if (global) {
+            header_text += "@" + id + " = dso_local global %" + type + " zeroinitializer\n";
+        } else {
+            buffer += "%" + id + " = alloca " + type + "\n";
+        }
+    }
+
     static void declareIntArray(String id, String len, Boolean global) {
         if (global) {
             header_text += "@" + id + " = global [" + len + " x i32] [i32 0";
@@ -144,6 +152,14 @@ class LLVMGenerator {
         buffer += "%" + reg + " = getelementptr [" + len + " x i8], [" + len + " x i8]* " + arrayId + ", i32 0, i32 " + elemId + "\n";
         buffer += "store i8 " + value + ", i8* %" + reg + "\n";
         reg++;
+    }
+
+    static void assignStructElement(String id, String elementId, String structType, String valueType, String value) {
+        if (valueType == "int"){
+            buffer += "store i32 " + value + ", i32* getelementptr inbounds (%" + structType + ", %" + structType + "* "+ id  +", i32 0, i32 " + elementId +") \n";
+        } else if (valueType == "real") {
+            buffer += "store double " + value + ", double* getelementptr inbounds (%" + structType + ", %" + structType + "* "+ id  +", i32 0, i32 " + elementId +") \n";
+        }
     }
 
     static void addInt(String val1, String val2) {
@@ -228,6 +244,16 @@ class LLVMGenerator {
         return reg - 1;
     }
 
+    static int loadFromStruct(String id, String elementId, String structType, String type) {
+        if (type.equals("int")){
+            buffer += "%" + reg + " = load i32, i32* getelementptr inbounds (%"+structType+", %"+structType+"* "+id+", i32 0, i32 "+elementId+")\n";
+        } else if (type.equals("real")) {
+            buffer += "%" + reg + " = load double, double* getelementptr inbounds (%"+structType+", %"+structType+"* "+id+", i32 0, i32 "+elementId+")\n";
+        }
+        reg++;
+        return reg - 1;
+    }
+
     static void icmp_constant(String id, String value, String type, String cond) {
         buffer += "%" + reg + " = load " + type + ", " + type + "* " + id + "\n";
         reg++;
@@ -308,6 +334,26 @@ class LLVMGenerator {
         header_text += buffer;
         buffer = "";
         reg = main_tmp;
+    }
+
+    static void structureHeaderExit(String strucName) {
+        main_text += buffer;
+        buffer = "%" + strucName + " = type { \n";
+    }
+
+    static void createStructparam(String type, boolean last) {
+        if (last){
+            buffer += "" + type + "\n";
+        } else {
+            buffer += "" + type + ",\n";
+        }
+
+    }
+
+    static void closeStruct() {
+        buffer += "} \n";
+        header_text += buffer;
+        buffer = "";
     }
 
     static void call(String id, String type){

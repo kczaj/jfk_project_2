@@ -29,7 +29,8 @@ public class LLVMActions extends CzajmalBaseListener {
         add("read");
     }};
 
-    HashMap<String,ArrayList<String>> functions = new HashMap<String,ArrayList<String>>();
+    HashMap<String, ArrayList<String>> functions = new HashMap<String, ArrayList<String>>();
+    HashMap<String, ArrayList<String>> structures = new HashMap<String, ArrayList<String>>();
 
     List<Value> argumentsList = new ArrayList<Value>();
     Stack<Value> stack = new Stack<Value>();
@@ -168,6 +169,7 @@ public class LLVMActions extends CzajmalBaseListener {
         }
         String ArrayOperation = ctx.operation().getChild(0).getText();
         if (ArrayOperation.charAt(0) == '"') {
+            // STRINGS
             try {
                 String arrType = variables.get(ID);
                 if (arrType == null) {
@@ -192,6 +194,7 @@ public class LLVMActions extends CzajmalBaseListener {
                 error(ctx.getStart().getLine(), "variable is not an array");
             }
         } else if (ArrayOperation.charAt(0) != '[') {
+            // OPERATION
             Value v = stack.pop();
             if (variables.containsKey(ID)) {
                 if (!v.type.equals(variables.get(ID))) {
@@ -305,6 +308,42 @@ public class LLVMActions extends CzajmalBaseListener {
     }
 
     @Override
+    public void exitStructElementsAssignment(CzajmalParser.StructElementsAssignmentContext ctx) {
+        String stuctureId = ctx.STRUCT_ID().getText();
+        String[] split_stuctureId = stuctureId.split("\\.");
+        String id = split_stuctureId[0];
+        String elementId = split_stuctureId[1];
+
+        if (!variables.containsKey(id) && !globalVariables.containsKey(id)) {
+            error(ctx.getStart().getLine(), "variable not declared");
+        }
+
+        String structType = variables.get(id);
+        if (structType == null) {
+            structType = globalVariables.get(id);
+        }
+        List<String> elementsList = structures.get(structType);
+        if (elementsList == null) {
+            error(ctx.getStart().getLine(), "unknown error");
+        }
+
+        try {
+            String value = ctx.struct_types().getText();
+            String valueType = ctx.struct_types().INT() == null ? "real" : "int";
+
+            if (!elementsList.get(Integer.parseInt(elementId)).equals(valueType)) {
+                error(ctx.getStart().getLine(), "wrong value type");
+            }
+
+            LLVMGenerator.assignStructElement(resolveScope(id), elementId, structType, valueType, value);
+
+        } catch (IndexOutOfBoundsException e) {
+            error(ctx.getStart().getLine(), "structure element out of bounds");
+        }
+
+    }
+
+    @Override
     public void exitStringIdAssignment(CzajmalParser.StringIdAssignmentContext ctx) {
         //Get array id and element id
         String ARRAY_ID = ctx.ARRAY_ID().getText();
@@ -341,44 +380,63 @@ public class LLVMActions extends CzajmalBaseListener {
     @Override
     public void exitDeclaration(CzajmalParser.DeclarationContext ctx) {
         String ID = ctx.ID().getText();
-        String TYPE = ctx.type().getText();
+        CzajmalParser.TypeContext TYPE_ctx = ctx.type();
 
-        if ((!variables.containsKey(ID) && !global) || (!globalVariables.containsKey(ID) && global)) {
-            if (types.contains(TYPE)) {
-                try {
-                    String ARRAY_LEN = ctx.array_declare().getChild(1).getText();
-
+        if (TYPE_ctx == null) {
+            String structName = ctx.structure_name().getText();
+            if (structures.containsKey(structName)) {
+                if ((!variables.containsKey(ID) && !global) || (!globalVariables.containsKey(ID) && global)) {
                     if (global) {
-                        globalVariables.put(ID, TYPE + '[' + ARRAY_LEN + ']');
+                        globalVariables.put(ID, structName);
                     } else {
-                        variables.put(ID, TYPE + '[' + ARRAY_LEN + ']');
+                        variables.put(ID, structName);
                     }
-                    if (TYPE.equals("int")) {
-                        LLVMGenerator.declareIntArray(ID, ARRAY_LEN, global);
-                    } else if (TYPE.equals("real")) {
-                        LLVMGenerator.declareRealArray(ID, ARRAY_LEN, global);
-                    } else if (TYPE.equals("char")) {
-                        LLVMGenerator.declareCharArray(ID, ARRAY_LEN, global);
-                    }
-                } catch (NullPointerException e) {
-                    if (global) {
-                        globalVariables.put(ID, TYPE);
-                    } else {
-                        variables.put(ID, TYPE);
-                    }
-                    if (TYPE.equals("int")) {
-                        LLVMGenerator.declareInt(ID, global);
-                    } else if (TYPE.equals("real")) {
-                        LLVMGenerator.declareReal(ID, global);
-                    } else if (TYPE.equals("char")) {
-                        LLVMGenerator.declareChar(ID, global);
-                    }
+                    LLVMGenerator.declareStructVar(ID, structName, global);
+                } else {
+                    error(ctx.getStart().getLine(), ", variable already defined: " + ID);
                 }
             } else {
-                error(ctx.getStart().getLine(), ", unknown variable type: " + TYPE);
+                error(ctx.getStart().getLine(), ", type not defined");
             }
         } else {
-            error(ctx.getStart().getLine(), ", variable already defined: " + ID);
+            String TYPE = ctx.type().getText();
+            if ((!variables.containsKey(ID) && !global) || (!globalVariables.containsKey(ID) && global)) {
+                if (types.contains(TYPE)) {
+                    try {
+                        String ARRAY_LEN = ctx.array_declare().getChild(1).getText();
+
+                        if (global) {
+                            globalVariables.put(ID, TYPE + '[' + ARRAY_LEN + ']');
+                        } else {
+                            variables.put(ID, TYPE + '[' + ARRAY_LEN + ']');
+                        }
+                        if (TYPE.equals("int")) {
+                            LLVMGenerator.declareIntArray(ID, ARRAY_LEN, global);
+                        } else if (TYPE.equals("real")) {
+                            LLVMGenerator.declareRealArray(ID, ARRAY_LEN, global);
+                        } else if (TYPE.equals("char")) {
+                            LLVMGenerator.declareCharArray(ID, ARRAY_LEN, global);
+                        }
+                    } catch (NullPointerException e) {
+                        if (global) {
+                            globalVariables.put(ID, TYPE);
+                        } else {
+                            variables.put(ID, TYPE);
+                        }
+                        if (TYPE.equals("int")) {
+                            LLVMGenerator.declareInt(ID, global);
+                        } else if (TYPE.equals("real")) {
+                            LLVMGenerator.declareReal(ID, global);
+                        } else if (TYPE.equals("char")) {
+                            LLVMGenerator.declareChar(ID, global);
+                        }
+                    }
+                } else {
+                    error(ctx.getStart().getLine(), ", unknown variable type: " + TYPE);
+                }
+            } else {
+                error(ctx.getStart().getLine(), ", variable already defined: " + ID);
+            }
         }
     }
 
@@ -441,34 +499,34 @@ public class LLVMActions extends CzajmalBaseListener {
             }
         } else {
             ArrayList<String> args = functions.get(FUNC_NAME);
-            if(args == null) {
+            if (args == null) {
                 error(ctx.getStart().getLine(), ", no such function: " + FUNC_NAME);
             }
-            if(argumentsList.size() != args.size()-1){
+            if (argumentsList.size() != args.size() - 1) {
                 error(ctx.getStart().getLine(), ", wrong number of arguments");
             }
-            if(args.get(0).equals("int")){
+            if (args.get(0).equals("int")) {
                 LLVMGenerator.call(FUNC_NAME, "i32");
-            } else if(args.get(0).equals("real")){
+            } else if (args.get(0).equals("real")) {
                 LLVMGenerator.call(FUNC_NAME, "double");
             } else {
                 error(ctx.getStart().getLine(), ", invalid type");
             }
             boolean last = false;
-            for(int i = 0; i < argumentsList.size(); i++){
-                if(i == argumentsList.size()-1){
+            for (int i = 0; i < argumentsList.size(); i++) {
+                if (i == argumentsList.size() - 1) {
                     last = true;
                 }
                 Value argument = argumentsList.get(i);
                 String argType = variables.get(argument.value);
-                if(argType == null){
+                if (argType == null) {
                     argType = globalVariables.get(argument.value);
                 }
-                String requiredArg = args.get(i+1);
-                if(argType.equals(requiredArg)){
-                    if(argType.equals("int")){
+                String requiredArg = args.get(i + 1);
+                if (argType.equals(requiredArg)) {
+                    if (argType.equals("int")) {
                         argType = "i32";
-                    } else if(argType.equals("real")){
+                    } else if (argType.equals("real")) {
                         argType = "double";
                     } else {
                         error(ctx.getStart().getLine(), "wrong type");
@@ -484,20 +542,21 @@ public class LLVMActions extends CzajmalBaseListener {
     public void exitFunctionAssignment(CzajmalParser.FunctionAssignmentContext ctx) {
         String id = ctx.ID().getText();
         String type = variables.get(id);
-        if(type == null){
+        if (type == null) {
             type = globalVariables.get(id);
         }
-        if(type == null){
+        if (type == null) {
             error(ctx.getStart().getLine(), "variable not defined");
         }
-        if(type.equals("int")){
+        if (type.equals("int")) {
             LLVMGenerator.callfinal(resolveScope(id), "i32");
-        } else if(type.equals("real")){
+        } else if (type.equals("real")) {
             LLVMGenerator.callfinal(resolveScope(id), "double");
         } else {
             error(ctx.getStart().getLine(), "wrong type");
         }
     }
+
     @Override
     public void exitValue(CzajmalParser.ValueContext ctx) {
         try {
@@ -599,6 +658,36 @@ public class LLVMActions extends CzajmalBaseListener {
             stack.push(new Value(type, "%" + reg));
         } else {
             error(ctx.getStart().getLine(), "no such array");
+        }
+    }
+
+    @Override
+    public void exitStruct_id(CzajmalParser.Struct_idContext ctx) {
+        String stuctureId = ctx.STRUCT_ID().getText();
+        String[] split_stuctureId = stuctureId.split("\\.");
+        String id = split_stuctureId[0];
+        String elementId = split_stuctureId[1];
+
+        if (!variables.containsKey(id) && !globalVariables.containsKey(id)) {
+            error(ctx.getStart().getLine(), "variable not declared");
+        }
+
+        String structType = variables.get(id);
+        if (structType == null) {
+            structType = globalVariables.get(id);
+        }
+        List<String> elementsList = structures.get(structType);
+        if (elementsList == null) {
+            error(ctx.getStart().getLine(), "unknown error");
+        }
+        try {
+            String type = elementsList.get(Integer.parseInt(elementId));
+            int reg = -1;
+
+            reg = LLVMGenerator.loadFromStruct(resolveScope(id), elementId, structType, type);
+            stack.push(new Value(type, "%" + reg));
+        } catch (IndexOutOfBoundsException e) {
+            error(ctx.getStart().getLine(), "structure element out of bounds");
         }
     }
 
@@ -822,34 +911,79 @@ public class LLVMActions extends CzajmalBaseListener {
     }
 
     @Override
+    public void exitStruct_header(CzajmalParser.Struct_headerContext ctx) {
+        String ID = ctx.ID().getText();
+        if (structures.containsKey(ID) || types.contains(ID)) {
+            error(ctx.getStart().getLine(), "type already defined");
+        } else {
+            structures.put(ID, new ArrayList<String>());
+            LLVMGenerator.structureHeaderExit(ID);
+        }
+    }
+
+    @Override
+    public void exitStructure(CzajmalParser.StructureContext ctx) {
+
+        String structName = ctx.struct_header().ID().getText();
+
+        CzajmalParser.StructparamsContext nctx = ctx.structparams();
+        while (nctx != null) {
+            CzajmalParser.StructparamsContext nnctx = nctx.structparams();
+            String type = nctx.type().getText();
+            if (!types.contains(type)) {
+                error(ctx.getStart().getLine(), "type not supported");
+            } else {
+                String llvmType = "";
+                if (type.equals("int")) {
+                    llvmType = "i32";
+                } else if (type.equals("real")) {
+                    llvmType = "double";
+                }
+                if (llvmType.equals("")) {
+                    error(ctx.getStart().getLine(), "type not supported");
+                }
+                structures.get(structName).add(type);
+                boolean last = nnctx == null ? true : false;
+                LLVMGenerator.createStructparam(llvmType, last);
+            }
+            if (nnctx == null) {
+                LLVMGenerator.closeStruct();
+                break;
+            }
+
+            nctx = nnctx;
+        }
+    }
+
+    @Override
     public void enterFunction(CzajmalParser.FunctionContext ctx) {
         global = false;
         String id = ctx.ID().getText();
         String type = ctx.type().getText();
         functions.put(id, new ArrayList<String>());
         functions.get(id).add(type);
-        if(type.equals("int")){
+        if (type.equals("int")) {
             type = "i32";
-        } else if(type.equals("real")){
+        } else if (type.equals("real")) {
             type = "double";
         } else {
             error(ctx.getStart().getLine(), "unsupported return parameter");
         }
         LLVMGenerator.functionstart(id, type);
         CzajmalParser.FparamsContext fp = ctx.fparams();
-        while(fp != null){
+        while (fp != null) {
             CzajmalParser.FparamsContext nfp = fp.fparams();
             String paramId = fp.ID().getText();
             String paramType = fp.type().getText();
             variables.put(paramId, paramType);
             functions.get(id).add(paramType);
             boolean last = false;
-            if(nfp == null){
+            if (nfp == null) {
                 last = true;
             }
-            if(paramType.equals("int")){
+            if (paramType.equals("int")) {
                 paramType = "i32";
-            } else if(paramType.equals("real")){
+            } else if (paramType.equals("real")) {
                 paramType = "double";
             } else {
                 error(ctx.getStart().getLine(), "unsupported function parameter");
@@ -860,16 +994,16 @@ public class LLVMActions extends CzajmalBaseListener {
     }
 
     @Override
-    public void exitReturnstatement(CzajmalParser.ReturnstatementContext ctx){
+    public void exitReturnstatement(CzajmalParser.ReturnstatementContext ctx) {
         String ID = ctx.ID().getText();
         String TYPE = variables.get(ID);
-        if(TYPE == null){
+        if (TYPE == null) {
             error(ctx.getStart().getLine(), "variable not defined");
         }
-        if(TYPE.equals("int")){
+        if (TYPE.equals("int")) {
             LLVMGenerator.loadInt(resolveScope(ID));
             TYPE = "i32";
-        } else if(TYPE.equals("real")){
+        } else if (TYPE.equals("real")) {
             LLVMGenerator.loadReal(resolveScope(ID));
             TYPE = "double";
         } else {

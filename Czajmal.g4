@@ -1,6 +1,6 @@
 grammar Czajmal;
 
-prog: (function? NEWLINE)* block;
+prog: (structure? NEWLINE)* (function? NEWLINE)* block;
 
 block: (statement? NEWLINE)*;
 
@@ -44,14 +44,20 @@ array_values: value ',' array_values
 array: '[' array_values ']';
 
 declaration: type ID
-            | type array_declare ID;
+            | type array_declare ID
+            | structure_name ID;
+
+structure_name: ID;
 
 assignment: declaration '=' operation #declarationAssignment
             | ID '=' call_function #functionAssignment
             | ID '=' operation  #idAssignment
             | ARRAY_ID '=' expr0    #arrayIdAssignment
             | ARRAY_ID '=' STRING   #stringIdAssignment
+            | STRUCT_ID '=' struct_types #structElementsAssignment
             ;
+
+struct_types: INT | REAL ;
 
 operation: expr0    #expression
           | array   #arrayOp
@@ -78,8 +84,19 @@ expr4:   INT            #int
        | REAL            #real
        | ID              #id
        | ARRAY_ID        #array_id
+       | STRUCT_ID       #struct_id
        | '(' expr0 ')'        #par
 ;
+
+//STRUCTURE
+structure: struct_header BEGINSTRUCT NEWLINE structparams NEWLINE endstruct;
+
+endstruct : ENDSTRUCT;
+
+struct_header: STRUCT ID;
+
+structparams: type NEWLINE structparams
+            | type ;
 
 //FUNCTIONS
 
@@ -126,6 +143,9 @@ LOOP: 'loop';
 ENDLOOP: 'endloop';
 FUNCTION: 'function';
 ENDFUNCTION: 'endfunction';
+STRUCT: 'structure';
+BEGINSTRUCT: 'beginstructure';
+ENDSTRUCT: 'endstructure';
 RETURN: 'return';
 
 STRING : '"' ( ~('\\'|'"') )* '"';
@@ -143,6 +163,8 @@ CHAR_TYPE : 'char';
 ID : ('a'..'z'|'A'..'Z')+;
 
 ARRAY_ID: ('a'..'z'|'A'..'Z')+'[''0'..'9'+']';
+
+STRUCT_ID:('a'..'z'|'A'..'Z')+'.''0'..'9'+;
 
 INT : '0'..'9'+;
 

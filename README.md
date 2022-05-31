@@ -1,6 +1,6 @@
 # Język _Czajmal_
-Jakub Czajka, Michał Malinowski
-###Podręcznik użytkowania
+__Autorzy__: Jakub Czajka, Michał Malinowski
+## Podręcznik użytkowania
 Projekt języku został wykonany w ramach przedmiotu _Języki formalne i kompilatory_. Do wykonania projektu został wykorzystany język _Java_. Gramatyka oraz _Parser_ zostały wykonane z wykorzystaniem narzędzia _ANTLR_.
 
 Język pozwala na tworzenie prostych programów z rozszerzeniem _cmal_. Umożliwa tworzenie zmienny, wykonywanie operacji arytmetycznych na zmiennych oraz obsługę zmiennych tablicowych.
@@ -11,7 +11,7 @@ W razie problemów język posiada rozbudowany modułu wskazywania błędów podc
 Język wymusza na programiście rozpoczęcie pliku od definicji struktur, następnie funkcji by później rozpocząć główną część działania programu. Składnia języka wzorowana była na języku Python stąd brak _;_ na końcach linii.
 Język jednak zmusza do jawnego definiowania typów zmiennych. 
 
-####Zmienne
+### Zmienne
 
 Język wspiera 3 typy zmiennych:
 - int - typ całkowity
@@ -48,7 +48,7 @@ a = 1.1 * 1.1 + 5.4 / 2.7
 ```
 Zmienne typu _char_ wykorzystywane są do tworzenia łańcuchów znaków. Używany jest do tego mechanizm zmiennych tablicowych.
 
-####Zmienne tablicowe
+### Zmienne tablicowe
 Zmienne tablicowe wspierają podstawowe typy zmiennych. Pozwalają na inicjalizację tablicy podczas deklaracji zmiennej, wykorzystywanie pojedyńczych elementów jak i manipulacja zawartością tablicy.
 
 Składnia zmiennych tablicowych:
@@ -66,7 +66,7 @@ real{2} arrR = [2.1, 24.2]
 ```
 W przypadku typu zmiennej _char_ składnia ma następującą formę:
 ```$xslt
-// delkaracja
+// deklaracja
 <typ>{<liczba elementów>} <nazwa zmiennej> 
 
 // deklaracja z przypisaniem
@@ -76,19 +76,19 @@ Przykładowy kod:
 ```$xslt
 char{5} s = "hello"
 ```
-####Funkcje wbudowane
+### Funkcje wbudowane
 Dostępne są 2 funkcje wbudowane:
 - print() - odpowiadający za wypisywanie wartości zmiennych 
 - read() - odpowiadający za wczytywanie wartości zmiennych
 
-#####Funkcja _print_
+#### Funkcja _print_
 Funkcja pozwala na wypisywanie wartości zmiennych typu _int_, _real_, _char_ oraz ich odpowiedników tablicowych (pojedyńcze elementy).
 
 Składnia wywołania funkcji:
 ```$xslt
 print(<zmienna wypisywana>)
 ``` 
-#####Funkcja _read_
+#### Funkcja _read_
 Funkcja pozwala na wpisywanie wartości zmiennych wprowadzony przez użytkownika typu _int_, _real_, _char_.
 
 Składnia wywołania funkcji:
@@ -96,7 +96,7 @@ Składnia wywołania funkcji:
 read(<zmienna wpisywana>)
 ``` 
 
-####Instrukcja warunkowa
+### Instrukcja warunkowa
 Instrukcja warunkowa pozwala na sterowanie przebiegiem działania programu. Operacje dozowlone w warunku to:
 - == - równość
 - != - nierówność
@@ -126,7 +126,7 @@ endif else
 x = 4
 endelse
 ```
-####Pętla
+### Pętla
 Przykładowy kod:
 ```
 loop x < 5 begin
@@ -137,7 +137,7 @@ loop x < 5 begin
     endloop
 endloop
 ```
-####Funkcja
+### Funkcja
 Przykładowy kod:
 ```$xslt
 real function testFun(int a, real b) begin
@@ -149,11 +149,12 @@ real function testFun(int a, real b) begin
 endfunction
 ```
 
-####Struktura
+### Struktura
 Struktura pozwala użytkownikowi na stworzenie własnego typu. Definiowana jest na początku działania programu.
 Nazwy struktur muszą być nazwami jednoznacznie określonymi. Możliwe typu dostępne w trakcie tworzenia struktur:
 - int
 - real
+
 Składnia struktury:
 ```$xslt
 structure <nazwa struktury> beginstructure

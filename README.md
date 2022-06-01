@@ -3,7 +3,7 @@ __Autorzy__: Jakub Czajka, Michał Malinowski
 ## Podręcznik użytkowania
 Projekt języku został wykonany w ramach przedmiotu _Języki formalne i kompilatory_. Do wykonania projektu został wykorzystany język _Java_. Gramatyka oraz _Parser_ zostały wykonane z wykorzystaniem narzędzia _ANTLR_.
 
-Język pozwala na tworzenie prostych programów z rozszerzeniem _cmal_. Umożliwa tworzenie zmienny, wykonywanie operacji arytmetycznych na zmiennych oraz obsługę zmiennych tablicowych.
+Język pozwala na tworzenie prostych programów z rozszerzeniem _cmal_. Umożliwa tworzenie zmiennych, wykonywanie operacji arytmetycznych na zmiennych oraz obsługę zmiennych tablicowych.
 Język posiada zaimplementowane podstawowe metody wejścia i wyjścia. Oprócz tego język umożliwia wykorzystanie instrukcji warunkowych oraz pętli. 
 Utworzony przez nas język pozwala równiez na tworzenie funkcji oraz struktur. Co więcej posiada mechanizm obsługi zasięgu zmiennych (zmienne globalne oraz lokalne). 
 W razie problemów język posiada rozbudowany modułu wskazywania błędów podczas analizy leksykalno-składniowej.
@@ -161,6 +161,12 @@ x = 4
 endelse
 ```
 ### Pętla
+Składania pętli:
+```$xslt
+loop <warunek> begin
+    <blok pętli>
+endloop
+```
 Przykładowy kod:
 ```
 loop x < 5 begin
@@ -171,7 +177,17 @@ loop x < 5 begin
     endloop
 endloop
 ```
+Pętle wymagają podania zadeklarowanej wcześniej zmiennej, która będzie zwiększana
+przed każdym przejściem pętli. Zmienna ta musi być typu `int`. Możliwe jest podanie dowolnego
+warunku zakończenia pętli z tych dostępnych w instrukcji warunkowej.
 ### Funkcja
+Składnia funkcji:
+```$xslt
+<typ zwracany> function <nazwa funkcji> (<typ argumentu> <argument>, ...) begin
+    <blok funkcji>
+    return <zwracana zmienna>
+endfunction
+```
 Przykładowy kod:
 ```$xslt
 real function testFun(int a, real b) begin
@@ -181,8 +197,16 @@ real function testFun(int a, real b) begin
     c = 2.0 * b
     return c
 endfunction
-```
 
+int x = 1
+real y = 2.0
+real z
+z = testFun(x, y)
+```
+Funkcja wymaga podania typu zwracanej wartości (real lub int), oraz typów argumentów (również real lub int).
+Przy wywoływaniu funkcji należy podać jako argumenty zadeklarowane wcześniej zmienne.
+
+Zmienne zadeklarowane w funkcji są traktowane jako zmienne lokalne i nie ma do nich dostępu poza blokiem funckji.
 ### Struktura
 Struktura pozwala użytkownikowi na stworzenie własnego typu. Definiowana jest na początku działania programu.
 Nazwy struktur muszą być nazwami jednoznacznie określonymi. Możliwe typu dostępne w trakcie tworzenia struktur:

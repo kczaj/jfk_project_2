@@ -11,6 +11,40 @@ W razie problemów język posiada rozbudowany modułu wskazywania błędów podc
 Język wymusza na programiście rozpoczęcie pliku od definicji struktur, następnie funkcji by później rozpocząć główną część działania programu. Składnia języka wzorowana była na języku Python stąd brak _;_ na końcach linii.
 Język jednak zmusza do jawnego definiowania typów zmiennych. 
 
+Podział kolejności bloków w programie:
+```$xslt
+<definicja struktury>
+<definicja struktury>
+...
+<definicja funkcji>
+<definicja funkcji>
+...
+<działanie programu>
+```
+Przykładowy kod:
+```$xslt
+structure Foo beginstructure
+int
+int
+real
+endstructure
+
+real function testFun(int a, real b) begin
+    print(a)
+    print(b)
+    real c
+    c = 2.0 * b
+    return c
+endfunction
+
+Foo f
+int x = 2
+real y = 3.5
+real z
+z = testFun(x, y)
+print(z)
+```
+
 ### Zmienne
 
 Język wspiera 3 typy zmiennych:
